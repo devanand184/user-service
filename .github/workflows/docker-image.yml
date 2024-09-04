@@ -20,6 +20,7 @@ jobs:
 
     - name: Restore dependencies
       run: dotnet restore
+      working-directory: repo/user-service
 
     - name: Build project
       run: dotnet build --configuration Release
