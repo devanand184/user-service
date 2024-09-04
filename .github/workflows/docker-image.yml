@@ -1,18 +1,43 @@
-name: Docker Image CI
+name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main  # or the branch you want to trigger the workflow
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: userservice
-      run: docker build . --user-service --tag dev:$(date +%s)
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '6.x'  # specify your .NET Core version
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build project
+      run: dotnet build --configuration Release
+
+    - name: Publish project
+      run: dotnet publish --configuration Release --output ./publish
+
+    - name: Build Docker image
+      run: |
+        docker build -t user-service:latest ./publish
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+    - name: Push Docker image
+      run: |
+        docker tag user-service-api:latest ${{ secrets.DOCKER_HUB_USERNAME }}/user-service-api:latest
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/user-service-api:latest
