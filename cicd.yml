@@ -1,0 +1,48 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.x'  # Specify your .NET Core version
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Run tests
+        run: dotnet test --no-restore --verbosity normal
+
+      - name: Publish
+        run: dotnet publish --configuration Release --output ./publish
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy application
+        run: |
+          # Replace this with your deployment commands
+          echo "Deploying application..."
+          # Example deployment commands (e.g., deploying to Azure Web App)
+          # az webapp deploy --resource-group <your-resource-group> --name <your-app-name> --src-path ./publish
