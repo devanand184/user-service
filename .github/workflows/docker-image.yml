@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: userservice
-      run: docker build . --file Dockerfile --tag dev:$(date +%s)
+      run: docker build . --user-service --tag dev:$(date +%s)
